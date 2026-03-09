@@ -28,6 +28,9 @@ app.use(cors({
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+app.get('/', (req, res) => {
+  res.send('UCab Backend Running');
+});
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
