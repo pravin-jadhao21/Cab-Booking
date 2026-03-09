@@ -1,0 +1,28 @@
+﻿Description
+  
+
+Explanation of ER Diagram
+User – Ride Relationship
+Type: One-to-Many
+
+Meaning: One user can book multiple rides, but each ride is booked by only one user.
+
+How it's stored: The Ride table has a UserID as a foreign key to link each ride to a specific user.
+
+Real-life example: A user opens the app and books a cab multiple times — each ride entry is tied to that user.
+Ride – Driver Relationship (Assigned To)
+Type: Many-to-One
+Meaning: Many rides can be assigned to one driver, but each ride is handled by only one driver.
+
+How it's stored: The Ride table contains a DriverID to show which driver is handling that ride.
+
+Real-life example: A driver gets assigned different rides throughout the day — each ride shows the driver who accepted it.
+Driver – Vehicle Relationship
+Type: One-to-One (or One-to-Many if needed)
+
+Meaning: A driver drives one vehicle, and optionally, a vehicle can be used by multiple drivers (if shifts are implemented).
+
+How it's stored: The Vehicle table stores DriverID as a foreign key.
+
+Real-life example: Driver A drives Car X during the day, and Driver B might use the same car at night.
+
