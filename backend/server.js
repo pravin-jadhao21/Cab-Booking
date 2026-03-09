@@ -19,9 +19,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // CORS middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: process.env.CLIENT_URL || 'http://localhost:5000',
   credentials: true
 }));
+
 
 // Logging middleware
 if (process.env.NODE_ENV === 'development') {
