@@ -19,7 +19,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // CORS middleware
 app.use(cors({
-  origin: "*",
+  origin: [
+    "http://localhost:5173",
+    "https://cab-booking-ctfmd3no1-pravin-jadhao21s-projects.vercel.app"
+  ],
   credentials: true
 }));
 
