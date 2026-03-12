@@ -241,11 +241,16 @@ This project is licensed under the MIT License.
 
 ---
 
-# 👨‍💻 Author
+# 👨‍💻 Authors
 
 Pravin Jadhao
-
 GitHub: https://github.com/pravin-jadhao21
+
+Ruchi Jadhav
+GitHub: https://github.com/ruchijadhav68-prog
+
+Raghav Deshpande 
+GitHub: https://github.com/ItsRaghav2006
 
 ---
 
