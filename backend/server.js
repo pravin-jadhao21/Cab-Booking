@@ -28,7 +28,7 @@ app.use(cors({
   origin: [
     "http://localhost:5173",
     "http://localhost:3000",
-    "https://cab-booking-ctfmd3no1-pravin-jadhao21s-projects.vercel.app"
+    "https://cab-booking-bay.vercel.app"
   ],
   credentials: true
 }));
@@ -75,7 +75,7 @@ const io = new Server(server, {
     origin: [
       "http://localhost:5173",
       "http://localhost:3000",
-      "https://cab-booking-2bcflytyk-pravin-jadhao21s-projects.vercel.app"
+      "https://cab-booking-bay.vercel.app"
     ],
     credentials: true
   }
@@ -124,11 +124,11 @@ server.listen(PORT, () => {
   console.log(`
 ╔═══════════════════════════════════════════════════════╗
 ║                                                       ║
-║   🚗  UCab Backend Server Running                    ║
+║   🚗  UCab Backend Server Running                     ║
 ║                                                       ║
-║   📡  Port: ${PORT}                                    ║
+║   📡  Port: ${PORT}                                   ║
 ║   🌍  Environment: ${process.env.NODE_ENV || 'development'}                     ║
-║   🔗  API: http://localhost:${PORT}/api              ║
+║   🔗  API: http://localhost:${PORT}/api               ║
 ║                                                       ║
 ╚═══════════════════════════════════════════════════════╝
   `);
