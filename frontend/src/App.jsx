@@ -2,6 +2,7 @@ import React, { useState, useEffect, createContext, useContext, useRef } from 'r
 import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
 import axios from 'axios';
+import { io } from 'socket.io-client';
 
 // ===================== ICONS =====================
 const Icon = ({ d, size = 20, color = 'currentColor', fill = 'none', strokeWidth = 2 }) => (
@@ -34,7 +35,9 @@ const AlertCircle = ({ size = 20 }) => <Icon size={size} d="M12 22a10 10 0 1 0 0
 const XCircle = ({ size = 20 }) => <Icon size={size} d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M15 9l-6 6 M9 9l6 6" />;
 
 // ===================== API =====================
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || BASE_URL;
+const API_URL = import.meta.env.VITE_API_URL || `${BASE_URL}/api`;
 const api = axios.create({ baseURL: API_URL, headers: { 'Content-Type': 'application/json' } });
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
@@ -584,15 +587,51 @@ function UserDashboard() {
   const pickupMarker = useRef(null);
   const dropMarker = useRef(null);
   const routeLine = useRef(null);
+  const socketRef = useRef(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const pollRef = useRef(null);
 
   useEffect(() => {
+    connectSocket();
     fetchRides();
     pollRef.current = setInterval(fetchRides, 5000);
-    return () => clearInterval(pollRef.current);
+    return () => {
+      clearInterval(pollRef.current);
+      if (socketRef.current) socketRef.current.disconnect();
+    };
   }, []);
+
+  const connectSocket = () => {
+    const token = localStorage.getItem('token');
+    if (!token || socketRef.current) return;
+
+    const socket = io(SOCKET_URL, {
+      auth: { token }
+    });
+
+    socket.on('connect', () => {
+      console.log('User socket connected', socket.id);
+    });
+
+    socket.on('ride:update', (ride) => {
+      setRides((prev) => {
+        const existing = prev.find((r) => r._id === ride._id);
+        if (!existing) return [ride, ...prev];
+        return prev.map((r) => (r._id === ride._id ? ride : r));
+      });
+    });
+
+    socket.on('driver:location', ({ rideId, currentLocation }) => {
+      setRides((prev) => prev.map((r) => (r._id === rideId ? { ...r, driverLocation: currentLocation } : r)));
+    });
+
+    socket.on('disconnect', () => {
+      console.log('User socket disconnected');
+    });
+
+    socketRef.current = socket;
+  };
 
   const fetchRides = async () => {
     try {
@@ -899,16 +938,58 @@ function DriverDashboard() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [otpInputs, setOtpInputs] = useState({});
+  const socketRef = useRef(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const pollRef = useRef(null);
 
   useEffect(() => {
+    connectSocket();
     fetchProfile();
     fetchRides();
     pollRef.current = setInterval(() => { fetchProfile(); fetchRides(); }, 5000);
-    return () => clearInterval(pollRef.current);
+    return () => {
+      clearInterval(pollRef.current);
+      if (socketRef.current) socketRef.current.disconnect();
+    };
   }, []);
+
+  useEffect(() => {
+    if (socketRef.current && profile?._id) {
+      socketRef.current.emit('joinDriverRoom', profile._id);
+    }
+  }, [profile]);
+
+  const connectSocket = () => {
+    const token = localStorage.getItem('token');
+    if (!token || socketRef.current) return;
+
+    const socket = io(SOCKET_URL, {
+      auth: { token }
+    });
+
+    socket.on('connect', () => {
+      console.log('Driver socket connected', socket.id);
+    });
+
+    socket.on('ride:update', (ride) => {
+      setRides((prev) => {
+        const existing = prev.find((r) => r._id === ride._id);
+        if (!existing) return [ride, ...prev];
+        return prev.map((r) => (r._id === ride._id ? ride : r));
+      });
+    });
+
+    socket.on('driver:location', ({ rideId, currentLocation }) => {
+      setRides((prev) => prev.map((r) => (r._id === rideId ? { ...r, driverLocation: currentLocation } : r)));
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Driver socket disconnected');
+    });
+
+    socketRef.current = socket;
+  };
 
   const fetchProfile = async () => {
     try { const { data } = await api.get('/drivers/profile'); setProfile(data.data); } catch {}

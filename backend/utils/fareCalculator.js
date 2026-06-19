@@ -1,22 +1,22 @@
 // Fare calculation based on vehicle type and distance
 const FARE_RATES = {
   mini: {
-    baseFare: 50,
-    perKm: 10,
+    baseFare: 10,
+    perKm: 15,
     perMinute: 1
   },
   sedan: {
-    baseFare: 80,
+    baseFare: 30,
     perKm: 15,
     perMinute: 1.5
   },
   suv: {
-    baseFare: 120,
+    baseFare: 40,
     perKm: 20,
     perMinute: 2
   },
   premium: {
-    baseFare: 200,
+    baseFare: 50,
     perKm: 30,
     perMinute: 3
   }

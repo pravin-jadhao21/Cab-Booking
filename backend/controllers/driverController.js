@@ -1,6 +1,7 @@
 const Driver = require('../models/Driver');
 const User = require('../models/User');
 const Ride = require('../models/Ride');
+const socketEvents = require('../utils/socketEvents');
 
 // @desc    Get driver profile
 // @route   GET /api/drivers/profile
@@ -72,6 +73,16 @@ const updateLocation = async (req, res) => {
       },
       { new: true }
     );
+
+    const activeRide = await Ride.findOne({ driver: driver._id, status: { $in: ['accepted', 'started'] } });
+    const payload = {
+      driverId: driver._id.toString(),
+      currentLocation: driver.currentLocation,
+      rideId: activeRide?._id?.toString() || null,
+      userId: activeRide?.user?.toString() || null
+    };
+
+    socketEvents.emit('driverLocationUpdated', payload);
 
     res.json({
       success: true,

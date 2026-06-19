@@ -1,5 +1,6 @@
 const Ride = require('../models/Ride');
 const Driver = require('../models/Driver');
+const socketEvents = require('../utils/socketEvents');
 const { calculateFare, calculateDistance, estimateDuration, generateOTP } = require('../utils/fareCalculator');
 
 const createRide = async (req, res) => {
@@ -15,6 +16,7 @@ const createRide = async (req, res) => {
       dropLocation: { type: 'Point', coordinates: dropLocation.coordinates, address: dropLocation.address },
       distance, duration, vehicleType, fare, paymentMethod, scheduledTime, otp, status: 'pending'
     });
+    socketEvents.emit('rideUpdated', ride);
     res.status(201).json({ success: true, message: 'Ride booked successfully', data: ride });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message || 'Failed to create ride' });
@@ -40,16 +42,18 @@ const acceptRide = async (req, res) => {
     if (!driver.isVerified) return res.status(403).json({ success: false, message: 'Driver not verified by admin yet' });
     if (!driver.isAvailable) return res.status(400).json({ success: false, message: 'Go online first to accept rides' });
 
-    const ride = await Ride.findById(req.params.id);
-    if (!ride) return res.status(404).json({ success: false, message: 'Ride not found' });
-    if (ride.status !== 'pending') return res.status(400).json({ success: false, message: 'Ride is no longer available' });
+    const ride = await Ride.findOneAndUpdate(
+      { _id: req.params.id, status: 'pending', driver: null },
+      { driver: driver._id, status: 'accepted' },
+      { new: true }
+    );
 
-    ride.driver = driver._id;
-    ride.status = 'accepted';
-    await ride.save();
+    if (!ride) return res.status(400).json({ success: false, message: 'Ride is no longer available or already accepted' });
+
     driver.isAvailable = false;
     await driver.save();
     await ride.populate('user', 'name phone');
+    socketEvents.emit('rideUpdated', ride);
     res.json({ success: true, message: 'Ride accepted successfully', data: ride });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to accept ride' });
@@ -59,13 +63,15 @@ const acceptRide = async (req, res) => {
 const startRide = async (req, res) => {
   try {
     const { otp } = req.body;
-    const ride = await Ride.findById(req.params.id);
-    if (!ride) return res.status(404).json({ success: false, message: 'Ride not found' });
-    if (ride.status !== 'accepted') return res.status(400).json({ success: false, message: 'Ride must be accepted first' });
-    if (ride.otp !== otp) return res.status(400).json({ success: false, message: 'Invalid OTP' });
-    ride.status = 'started';
-    ride.startTime = new Date();
-    await ride.save();
+    const ride = await Ride.findOneAndUpdate(
+      { _id: req.params.id, status: 'accepted', otp },
+      { status: 'started', startTime: new Date() },
+      { new: true }
+    );
+
+    if (!ride) return res.status(400).json({ success: false, message: 'Ride must be accepted first and OTP must match' });
+
+    socketEvents.emit('rideUpdated', ride);
     res.json({ success: true, message: 'Ride started successfully', data: ride });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to start ride' });
@@ -74,14 +80,22 @@ const startRide = async (req, res) => {
 
 const completeRide = async (req, res) => {
   try {
-    const ride = await Ride.findById(req.params.id);
-    if (!ride) return res.status(404).json({ success: false, message: 'Ride not found' });
-    if (ride.status !== 'started') return res.status(400).json({ success: false, message: 'Ride must be started first' });
-    ride.status = 'completed';
-    ride.endTime = new Date();
-    await ride.save();
+    const ride = await Ride.findOneAndUpdate(
+      { _id: req.params.id, status: 'started' },
+      { status: 'completed', endTime: new Date() },
+      { new: true }
+    );
+
+    if (!ride) return res.status(400).json({ success: false, message: 'Ride must be started first' });
+
     const driver = await Driver.findById(ride.driver);
-    if (driver) { driver.totalRides += 1; driver.earnings += ride.fare.total; driver.isAvailable = true; await driver.save(); }
+    if (driver) {
+      driver.totalRides += 1;
+      driver.earnings += ride.fare.total;
+      driver.isAvailable = true;
+      await driver.save();
+    }
+    socketEvents.emit('rideUpdated', ride);
     res.json({ success: true, message: 'Ride completed successfully', data: ride });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to complete ride' });
@@ -98,6 +112,7 @@ const cancelRide = async (req, res) => {
     ride.cancellationReason = reason || 'Cancelled';
     await ride.save();
     if (ride.driver) await Driver.findByIdAndUpdate(ride.driver, { isAvailable: true });
+    socketEvents.emit('rideUpdated', ride);
     res.json({ success: true, message: 'Ride cancelled successfully', data: ride });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to cancel ride' });
