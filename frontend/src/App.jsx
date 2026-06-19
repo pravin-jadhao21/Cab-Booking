@@ -105,6 +105,7 @@ const StatusBadge = ({ status }) => {
     started:   { bg: '#ede9fe', color: '#5b21b6', label: '🚗 In Progress' },
     completed: { bg: '#d1fae5', color: '#065f46', label: '✅ Completed' },
     cancelled: { bg: '#fee2e2', color: '#991b1b', label: '✗ Cancelled' },
+    expired:   { bg: '#fffbeb', color: '#92400e', label: '⏰ Expired' },
   };
   const c = cfg[status] || cfg.pending;
   return (
@@ -731,6 +732,7 @@ function UserDashboard() {
                 {activeRide.status === 'pending' && '⏳ Looking for a driver nearby…'}
                 {activeRide.status === 'accepted' && `✅ Driver accepted! Share OTP: `}
                 {activeRide.status === 'started' && '🚗 Your ride is in progress!'}
+              
                 {activeRide.status === 'accepted' && <strong style={{ color: '#1d4ed8', fontSize: 18 }}> {activeRide.otp}</strong>}
               </p>
               {activeRide.driver && activeRide.driver.user && (
