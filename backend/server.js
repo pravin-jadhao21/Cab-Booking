@@ -8,6 +8,7 @@ const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const socketEvents = require('./utils/socketEvents');
 const { verifyToken } = require('./utils/jwt');
+require('./cronJobs/rideExpiry');
 
 // Load env vars
 dotenv.config();
