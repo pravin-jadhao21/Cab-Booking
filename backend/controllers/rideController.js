@@ -30,33 +30,29 @@ const createRide = async (req, res) => {
 
     const otp = generateOTP();
 
-    const ride = await Ride.create({
-      user: req.user._id,
-      pickupLocation: {
-        type: 'Point',
-        coordinates: pickupLocation.coordinates,
-        address: pickupLocation.address
-      },
-      dropLocation: {
-        type: 'Point',
-        coordinates: dropLocation.coordinates,
-        address: dropLocation.address
-      },
-      distance,
-      duration,
-      vehicleType,
-      fare,
-      paymentMethod,
-      scheduledTime,
-      otp,
-      otpExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
-      status: 'pending',
-      rideRequestExpiresAt: new Date(Date.now() + 10 * 60 * 1000),
-      
-    status: 'expired',
-    cancellationReason: 'No driver accepted within 10 minutes'
-  
-    });
+const ride = await Ride.create({
+  user: req.user._id,
+  pickupLocation: {
+    type: 'Point',
+    coordinates: pickupLocation.coordinates,
+    address: pickupLocation.address
+  },
+  dropLocation: {
+    type: 'Point',
+    coordinates: dropLocation.coordinates,
+    address: dropLocation.address
+  },
+  distance,
+  duration,
+  vehicleType,
+  fare,
+  paymentMethod,
+  scheduledTime,
+  otp,
+  otpExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
+  status: 'pending',
+  rideRequestExpiresAt: new Date(Date.now() + 10 * 60 * 1000)
+});
 
     socketEvents.emit('rideUpdated', ride);
 

@@ -5,7 +5,7 @@ console.log('Ride expiry cron job initialized');
 
 cron.schedule('* * * * *', async () => {
   try {
-    console.log('Cron running:', new Date());
+    
 
     const result = await Ride.updateMany(
       {
@@ -17,7 +17,7 @@ cron.schedule('* * * * *', async () => {
       }
     );
 
-    console.log('Expired rides:', result.modifiedCount);
+    //console.log('Expired rides:', result.modifiedCount);
 
   } catch (err) {
     console.error('Ride expiry job failed:', err.message);
