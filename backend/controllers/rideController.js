@@ -5,21 +5,72 @@ const { calculateFare, calculateDistance, estimateDuration, generateOTP } = requ
 
 const createRide = async (req, res) => {
   try {
-    const { pickupLocation, dropLocation, vehicleType, paymentMethod, scheduledTime } = req.body;
-    const distance = calculateDistance(pickupLocation.coordinates[1], pickupLocation.coordinates[0], dropLocation.coordinates[1], dropLocation.coordinates[0]);
+    const {
+      pickupLocation,
+      dropLocation,
+      vehicleType,
+      paymentMethod,
+      scheduledTime
+    } = req.body;
+
+    const distance = calculateDistance(
+      pickupLocation.coordinates[1],
+      pickupLocation.coordinates[0],
+      dropLocation.coordinates[1],
+      dropLocation.coordinates[0]
+    );
+
     const duration = estimateDuration(distance);
-    const fare = calculateFare(vehicleType, distance, duration);
+
+    const fare = calculateFare(
+      vehicleType,
+      distance,
+      duration
+    );
+
     const otp = generateOTP();
+
     const ride = await Ride.create({
       user: req.user._id,
-      pickupLocation: { type: 'Point', coordinates: pickupLocation.coordinates, address: pickupLocation.address },
-      dropLocation: { type: 'Point', coordinates: dropLocation.coordinates, address: dropLocation.address },
-      distance, duration, vehicleType, fare, paymentMethod, scheduledTime, otp, status: 'pending'
+      pickupLocation: {
+        type: 'Point',
+        coordinates: pickupLocation.coordinates,
+        address: pickupLocation.address
+      },
+      dropLocation: {
+        type: 'Point',
+        coordinates: dropLocation.coordinates,
+        address: dropLocation.address
+      },
+      distance,
+      duration,
+      vehicleType,
+      fare,
+      paymentMethod,
+      scheduledTime,
+      otp,
+      otpExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
+      status: 'pending',
+      rideRequestExpiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      
+    status: 'expired',
+    cancellationReason: 'No driver accepted within 10 minutes'
+  
     });
+
     socketEvents.emit('rideUpdated', ride);
-    res.status(201).json({ success: true, message: 'Ride booked successfully', data: ride });
+
+    res.status(201).json({
+      success: true,
+      message: 'Ride booked successfully',
+      data: ride
+    });
+
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message || 'Failed to create ride' });
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to create ride'
+    });
   }
 };
 
@@ -38,43 +89,108 @@ const getFareEstimate = async (req, res) => {
 const acceptRide = async (req, res) => {
   try {
     const driver = await Driver.findOne({ user: req.user._id });
-    if (!driver) return res.status(404).json({ success: false, message: 'Driver profile not found' });
-    if (!driver.isVerified) return res.status(403).json({ success: false, message: 'Driver not verified by admin yet' });
-    if (!driver.isAvailable) return res.status(400).json({ success: false, message: 'Go online first to accept rides' });
+
+    if (!driver)
+      return res.status(404).json({
+        success: false,
+        message: 'Driver profile not found'
+      });
+
+    if (!driver.isVerified)
+      return res.status(403).json({
+        success: false,
+        message: 'Driver not verified by admin yet'
+      });
+
+    if (!driver.isAvailable)
+      return res.status(400).json({
+        success: false,
+        message: 'Go online first to accept rides'
+      });
 
     const ride = await Ride.findOneAndUpdate(
-      { _id: req.params.id, status: 'pending', driver: null },
-      { driver: driver._id, status: 'accepted' },
-      { new: true }
+      {
+        _id: req.params.id,
+        status: 'pending',
+        driver: null,
+        rideRequestExpiresAt: { $gt: new Date() }
+      },
+      {
+        driver: driver._id,
+        status: 'accepted'
+      },
+      {
+        new: true
+      }
     );
 
-    if (!ride) return res.status(400).json({ success: false, message: 'Ride is no longer available or already accepted' });
+    if (!ride)
+      return res.status(400).json({
+        success: false,
+        message: 'Ride expired, already accepted, or no longer available'
+      });
 
     driver.isAvailable = false;
     await driver.save();
+
     await ride.populate('user', 'name phone');
+
     socketEvents.emit('rideUpdated', ride);
-    res.json({ success: true, message: 'Ride accepted successfully', data: ride });
+
+    res.json({
+      success: true,
+      message: 'Ride accepted successfully',
+      data: ride
+    });
+
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to accept ride' });
+    res.status(500).json({
+      success: false,
+      message: 'Failed to accept ride'
+    });
   }
 };
 
 const startRide = async (req, res) => {
   try {
     const { otp } = req.body;
+
     const ride = await Ride.findOneAndUpdate(
-      { _id: req.params.id, status: 'accepted', otp },
-      { status: 'started', startTime: new Date() },
-      { new: true }
+      {
+        _id: req.params.id,
+        status: 'accepted',
+        otp,
+        otpExpiresAt: { $gt: new Date() }
+      },
+      {
+        status: 'started',
+        startTime: new Date()
+      },
+      {
+        new: true
+      }
     );
 
-    if (!ride) return res.status(400).json({ success: false, message: 'Ride must be accepted first and OTP must match' });
+    if (!ride) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid OTP or OTP expired'
+      });
+    }
 
     socketEvents.emit('rideUpdated', ride);
-    res.json({ success: true, message: 'Ride started successfully', data: ride });
+
+    res.json({
+      success: true,
+      message: 'Ride started successfully',
+      data: ride
+    });
+
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to start ride' });
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to start ride'
+    });
   }
 };
 
