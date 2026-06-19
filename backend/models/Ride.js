@@ -126,7 +126,14 @@ const rideSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+otpExpiresAt: {
+  type: Date
+},
+
+rideRequestExpiresAt: {
+  type: Date
+},
 });
 
 // Create geospatial indexes
