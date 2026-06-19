@@ -75,7 +75,7 @@ const io = new Server(server, {
     origin: [
       "http://localhost:5173",
       "http://localhost:3000",
-      "https://cab-booking-ctfmd3no1-pravin-jadhao21s-projects.vercel.app"
+      "https://cab-booking-2bcflytyk-pravin-jadhao21s-projects.vercel.app"
     ],
     credentials: true
   }
