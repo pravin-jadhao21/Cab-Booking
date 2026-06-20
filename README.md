@@ -16,6 +16,14 @@ https://cab-booking-bay.vercel.app
 
 https://cab-booking-rxra.onrender.com
 
+## NOTE: 
+Driver accounts require admin verification before they can accept rides. Since the admin panel is restricted, new driver registrations will remain pending approval.
+
+## DRIVER Demo Credentials:
+email- td1@test.com  (Select vehicle type - mini while booking ride as demo driver's vehicle type is mini)
+
+pass-  TestDriver123
+
 ---
 
 # ✨ Features
@@ -267,12 +275,13 @@ npm run dev
 
 1. Login/Register
 2. Select pickup & destination
-3. Get fare estimate
-4. Book ride
-5. Receive OTP
-6. Track ride status
-7. Complete ride
-8. Submit rating
+3. Select Vehicle Type
+4. Get fare estimate
+5. Book ride
+6. Receive OTP
+7. Track ride status
+8. Complete ride
+9. Submit rating
 
 ### Driver
 
