@@ -373,6 +373,9 @@ Pending
 
 <img width="1840" height="1079" alt="image" src="https://github.com/user-attachments/assets/478469a0-739b-40a1-a482-700c2b6703be" />
 
+<img width="1832" height="1022" alt="Screenshot from 2026-06-20 13-54-27" src="https://github.com/user-attachments/assets/d74c351f-236d-4578-aff0-5aff6fe064be" />
+
+
 
 
 ---
