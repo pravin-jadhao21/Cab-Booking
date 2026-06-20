@@ -1,43 +1,116 @@
-# 🚖 UCab – Cab Booking System
+# 🚖 UCab – Real-Time Cab Booking System
 
-A full-stack cab booking web application where passengers can request rides and drivers can accept them in real time.
-This project demonstrates a complete ride-booking workflow including authentication, ride creation, driver acceptance, and ride status updates.
+A full-stack MERN cab booking platform that enables passengers to book rides and drivers to accept them in real time.
+
+The system includes secure authentication, ride lifecycle management, OTP-based ride verification, live ride status updates using Socket.IO, automatic ride expiration, driver management, and responsive dashboards for both passengers and drivers.
 
 ---
 
 # 🌐 Live Demo
 
-Frontend (Deployed on Vercel)
-https://cab-booking-ctfmd3no1-pravin-jadhao21s-projects.vercel.app
+### Frontend (Vercel)
 
-Backend API (Deployed on Railway)
-https://cab-booking-production-4a5b.up.railway.app
+https://cab-booking-bay.vercel.app
+
+### Backend API (Render)
+
+https://cab-booking-rxra.onrender.com
 
 ---
 
-# 📌 Features
+# ✨ Features
 
-## Passenger Features
+## 👤 Passenger Features
 
-* User registration and login
-* Create ride requests
-* View ride status
-* Track accepted rides
+- User Registration & Login
+- JWT Authentication
+- Book a Ride
+- Fare Estimation
+- View Active Ride Status
+- Ride History
+- Cancel Ride Request
+- OTP-Based Ride Verification
+- Rate Completed Rides
+- Real-Time Ride Updates
 
-## Driver Features
+---
 
-* Driver login
-* View available ride requests
-* Accept ride requests
-* Update ride status
+## 🚗 Driver Features
 
-## System Features
+- Driver Registration & Login
+- Driver Verification System
+- Go Online / Offline
+- View Available Ride Requests
+- Accept Ride Requests
+- Start Ride using OTP Verification
+- Complete Ride
+- Driver Earnings Dashboard
+- Driver Ratings
+- Real-Time Ride Notifications
 
-* Secure authentication using JWT
-* Role-based access (Passenger / Driver)
-* RESTful API architecture
-* MongoDB database integration
-* Full stack deployment
+---
+
+## ⚡ Real-Time Features
+
+- Socket.IO Integration
+- Live Ride Status Updates
+- Instant Ride Acceptance Notifications
+- Ride Started / Completed Notifications
+- Driver Availability Updates
+- Real-Time Event Broadcasting
+
+---
+
+## 🔒 Security Features
+
+- JWT Authentication
+- Password Hashing using bcrypt
+- Protected Routes
+- Role-Based Authorization
+- OTP Verification Before Ride Start
+
+---
+
+## 🧠 Smart System Features
+
+### Real-Time Ride Updates
+
+Implemented using Socket.IO to provide instant updates for:
+
+- Ride Created
+- Ride Accepted
+- Ride Started
+- Ride Completed
+- Ride Cancelled
+
+Without requiring page refreshes.
+
+
+### Ride Request Expiry
+
+If no driver accepts a ride within 10 minutes:
+
+- Ride automatically expires
+- Drivers can no longer accept it
+- User sees "Ride Expired" status
+
+### OTP Expiry
+
+- OTP generated during ride booking
+- Valid for limited time
+- Prevents unauthorized ride starts
+
+### Race Condition Handling
+
+Only one driver can successfully accept a ride.
+
+Implemented using atomic MongoDB updates:
+
+```js
+findOneAndUpdate()
+```
+
+This prevents multiple drivers from accepting the same ride simultaneously.
 
 ---
 
@@ -45,169 +118,251 @@ https://cab-booking-production-4a5b.up.railway.app
 
 ## Frontend
 
-* React
-* Vite
-* Axios
-* CSS / Tailwind (if used)
+- React.js
+- Vite
+- Axios
+- React Router
+- Socket.IO Client
+- CSS3
 
 ## Backend
 
-* Node.js
-* Express.js
-* JWT Authentication
-* REST API
+- Node.js
+- Express.js
+- Socket.IO
+- JWT Authentication
+- bcryptjs
+- Node Cron
 
 ## Database
 
-* MongoDB Atlas
+- MongoDB Atlas
+- Mongoose ODM
 
 ## Deployment
 
-* Vercel – Frontend hosting
-* Railway – Backend hosting
+- Vercel (Frontend)
+- Render (Backend)
 
 ---
 
-## 📂 Project Structure
+# 📂 Project Structure
 
-```
+```text
 Cab-Booking
 │
 ├── backend
+│   ├── config
 │   ├── controllers
+│   ├── cronJobs
+│   ├── middleware
 │   ├── models
 │   ├── routes
-│   ├── middleware
-│   ├── config
-│   └── server.js
+│   ├── utils
+│   ├── server.js
+│   ├── package.json
+│   └── package-lock.json
 │
 ├── frontend
 │   ├── src
-│   │   ├── components
-│   │   ├── pages
-│   │   ├── services
-│   │   └── App.jsx
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── index.css
 │   │
-│   └── package.json
+│   ├── public
+│   ├── index.html
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   ├── postcss.config.js
+│   ├── package.json
+│   ├── package-lock.json
+│   └── .gitignore
 │
-└── README.md
+├── project-architecture
+│
+├── README.md
+├── fix-remove-distance.sh
+├── setup-complete-frontend.sh
+└── .gitignore
 ```
-
+```
 
 ---
 
 # ⚙️ Installation & Setup
 
-## 1️⃣ Clone the Repository
+## 1️⃣ Clone Repository
 
+```bash
 git clone https://github.com/pravin-jadhao21/Cab-Booking.git
 
 cd Cab-Booking
+```
 
 ---
 
 # 2️⃣ Backend Setup
 
+```bash
 cd backend
 
-Install dependencies
-
 npm install
+```
 
-Create .env file
+Create `.env`
 
+```env
 PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
 
-Run backend
+MONGO_URI=your_mongodb_atlas_uri
 
+JWT_SECRET=your_secret_key
+
+CLIENT_URL=http://localhost:5173
+```
+
+Run backend:
+
+```bash
 npm run dev
+```
 
 ---
 
 # 3️⃣ Frontend Setup
 
+```bash
 cd frontend
 
-Install dependencies
-
 npm install
+```
 
-Create .env file
+Create `.env`
 
+```env
 VITE_API_URL=http://localhost:5000/api
+```
 
-Run frontend
+Run frontend:
 
+```bash
 npm run dev
+```
 
 ---
 
-# 🔐 Authentication
+# 🔐 Authentication Flow
 
-The system uses **JWT (JSON Web Tokens)** for authentication.
-
-After login:
-
-* A token is generated
-* Stored on the client
-* Sent with every protected API request
+1. User logs in
+2. JWT token generated
+3. Token stored on client
+4. Token attached to protected requests
+5. Middleware verifies token before access
 
 ---
 
-# 🚗 Ride Booking Workflow
+# 🚖 Ride Booking Workflow
 
-1. Passenger registers/logs in
-2. Passenger creates ride request
-3. Ride request stored in database
-4. Driver logs in
-5. Driver views available ride requests
-6. Driver accepts ride
-7. Ride status updates to **Accepted**
+### Passenger
+
+1. Login/Register
+2. Select pickup & destination
+3. Get fare estimate
+4. Book ride
+5. Receive OTP
+6. Track ride status
+7. Complete ride
+8. Submit rating
+
+### Driver
+
+1. Login/Register
+2. Go online
+3. View available rides
+4. Accept ride
+5. Verify OTP
+6. Start ride
+7. Complete ride
+8. Receive earnings update
 
 ---
 
-# 🗄 Database
+# 🔄 Ride Status Lifecycle
 
-MongoDB Atlas stores:
+```text
+Pending
+   │
+   ├── Accepted
+   │       │
+   │       └── Started
+   │               │
+   │               └── Completed
+   │
+   ├── Cancelled
+   │
+   └── Expired
+```
 
-Users
+---
 
-* id
-* name
-* email
-* password
-* role (driver/passenger)
+# 🗄 Database Collections
 
-Rides
+## Users
 
-* id
-* passengerId
-* driverId
-* pickupLocation
-* destination
-* status
+```text
+- name
+- email
+- password
+- role
+- phone
+```
+
+## Drivers
+
+```text
+- user
+- vehicleType
+- vehicleNumber
+- vehicleModel
+- rating
+- earnings
+- isAvailable
+- isVerified
+```
+
+## Rides
+
+```text
+- user
+- driver
+- pickupLocation
+- dropLocation
+- distance
+- duration
+- fare
+- status
+- otp
+- otpExpiresAt
+- rideRequestExpiresAt
+- rating
+```
 
 ---
 
 # 📸 Screenshots
 
-<img width="1849" height="1077" alt="image" src="https://github.com/user-attachments/assets/4e2fbd08-4990-48f5-9ca8-77dc67cf7b87" />
+<img width="1840" height="1079" alt="image" src="https://github.com/user-attachments/assets/f5da6ddc-4dcb-4b4d-997c-75d6935746c4" />
 
-<img width="1849" height="1077" alt="image" src="https://github.com/user-attachments/assets/55bea86b-7bb0-48ee-b3ef-d392e092d88d" />
+<img width="1840" height="1079" alt="image" src="https://github.com/user-attachments/assets/94be2022-f013-4bcf-ab20-32a1c4bc793a" />
 
-<img width="1849" height="1077" alt="image" src="https://github.com/user-attachments/assets/33c6161f-be09-4209-ab7e-9e9a2dc3fb7e" />
+<img width="1840" height="1079" alt="image" src="https://github.com/user-attachments/assets/42a499ff-8589-4adc-b64c-5a30d3860357" />
 
-<img width="1849" height="1077" alt="image" src="https://github.com/user-attachments/assets/8ebac077-304c-40b8-ba4c-e030cc65f1ff" />
 
-<img width="1849" height="1077" alt="image" src="https://github.com/user-attachments/assets/de5dd40c-c568-4c28-a38c-124bc7e6a31b" />
+<img width="1840" height="1079" alt="image" src="https://github.com/user-attachments/assets/9c42d1bc-2687-44e8-badb-a3487e021b27" />
 
-<img width="1849" height="1077" alt="image" src="https://github.com/user-attachments/assets/b6be6063-3d14-49c0-b968-f713b6f4d9d2" />
+<img width="1840" height="1079" alt="image" src="https://github.com/user-attachments/assets/7f6297ac-27cd-4930-b6f5-ea47784dfe0a" />
 
-<img width="1849" height="1089" alt="image" src="https://github.com/user-attachments/assets/dba9cc07-9880-4f18-adc4-e84b4fc854ec" />
-
-<img width="1859" height="1087" alt="image" src="https://github.com/user-attachments/assets/38a5e638-d95d-42f1-a153-3281537821d6" />
+<img width="1840" height="1079" alt="image" src="https://github.com/user-attachments/assets/478469a0-739b-40a1-a482-700c2b6703be" />
 
 
 
@@ -215,43 +370,39 @@ Rides
 
 # 🚀 Future Improvements
 
-* Real-time ride updates using Socket.io
-* Live driver tracking with maps
-* Payment gateway integration
-* Ride history
-* Rating system
-* Mobile responsive UI improvements
+- Live Driver Location Tracking
+- Interactive Maps Integration (Leaflet/Google Maps)
+- Route Navigation
+- Payment Gateway Integration
+- Push Notifications
+- Ride Scheduling
+- Surge Pricing
+- Admin Analytics Dashboard
+- Mobile App Version
 
 ---
 
-# 🤝 Contributing
+# 📈 Key Learning Outcomes
 
-Contributions are welcome.
+This project demonstrates:
 
-1. Fork the repository
-2. Create a new branch
-3. Commit your changes
-4. Open a pull request
+- MERN Stack Development
+- REST API Design
+- MongoDB Data Modeling
+- JWT Authentication
+- Socket.IO Real-Time Communication
+- Race Condition Handling
+- Cron Jobs & Background Tasks
+- Deployment on Render & Vercel
+- Production-Level Backend Architecture
 
 ---
+
 
 # 📄 License
 
-This project is licensed under the MIT License.
+Licensed under the MIT License.
 
 ---
 
-# 👨‍💻 Authors
-
-Pravin Jadhao
-GitHub: https://github.com/pravin-jadhao21
-
-Ruchi Jadhav
-GitHub: https://github.com/ruchijadhav68-prog
-
-Raghav Deshpande 
-GitHub: https://github.com/ItsRaghav2006
-
----
-
-⭐ If you like this project, consider giving it a star on GitHub!
+⭐ If you found this project useful, please consider giving it a Star on GitHub.
